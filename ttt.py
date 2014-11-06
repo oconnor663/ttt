@@ -85,6 +85,28 @@ def get_winner(board):
     return None
 
 
+def possible_moves(board, player_to_move):
+    moves = []
+    for row in range(get_height(board)):
+        for col in range(get_width(board)):
+            if board[row][col] is None:
+                moves.append((row, col))
+    return moves
+
+
+def best_move(board, player_to_move, other_player):
+    all_possible = possible_moves(board, player_to_move)
+    for move in all_possible:
+        new_board = make_move(board, player_to_move, move[0], move[1])
+        winner = get_winner(new_board)
+        if winner == player_to_move:
+            return move
+        response = best_move(new_board, other_player, player_to_move)
+        if response is None:
+            return move
+    return None
+
+
 def main():
     height = 3
     width = 3
@@ -93,6 +115,9 @@ def main():
     turn = 0
     while True:
         player = players[turn % 2]
+        other_player = players[(turn + 1) % 2]
+        best = best_move(board, player, other_player)
+        print("The computer says your best move is:", repr(best))
         move_str = input(player + "'s move: ")
         row, col = (int(i) for i in move_str.split())
         if row >= height or col >= width or board[row][col] is not None:
