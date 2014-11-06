@@ -110,6 +110,9 @@ def best_move(board, player_to_move, other_player):
 def main():
     height = 3
     width = 3
+    if len(sys.argv) > 1:
+        height = int(sys.argv[1])
+        width = int(sys.argv[2])
     board = new_board(height, width)
     players = ('X', 'O')
     turn = 0
