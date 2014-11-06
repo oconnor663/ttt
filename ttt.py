@@ -10,6 +10,17 @@ def get_width(board):
     return len(board[0])
 
 
+def format_board(board):
+    row_separator = "\n" + "┼".join(["───"] * get_width(board)) + "\n"
+    return row_separator.join(
+        " " + " │ ".join(char or " " for char in row)
+        for row in board)
+
+
+def print_board(board):
+    print(format_board(board))
+
+
 def get_victory_lines(board):
     lines = []
     # Add in all the rows.
