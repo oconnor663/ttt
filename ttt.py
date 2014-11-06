@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 def new_board(height, width):
     return [[None] * width for i in range(height)]
 
@@ -72,3 +74,29 @@ def get_winner(board):
         else:
             return startval
     return None
+
+
+def main():
+    height = 3
+    width = 3
+    board = new_board(height, width)
+    players = ('X', 'O')
+    turn = 0
+    while True:
+        player = players[turn % 2]
+        move = input(player + "'s move: ")
+        row, col = (int(i) for i in move.split())
+        if row >= height or col >= width or board[row][col] is not None:
+            print("Invalid move.")
+            continue
+        board[row][col] = player
+        print_board(board)
+        winner = get_winner(board)
+        if winner is not None:
+            print(winner, "wins!")
+            return
+        turn += 1
+
+
+if __name__ == '__main__':
+    main()
