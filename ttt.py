@@ -1,5 +1,12 @@
 #! /usr/bin/python3
 
+import sys
+
+
+LOSE = "LOSE"
+DRAW = "DRAW"
+WIN = "WIN"
+
 
 def new_board(height, width):
     return ((None,) * width,) * height
@@ -82,7 +89,11 @@ def get_winner(board):
                 break
         else:
             return startval
-    return None
+    for row in range(get_height(board)):
+        for col in range(get_width(board)):
+            if board[row][col] is None:
+                return None
+    return DRAW
 
 
 def possible_moves(board, player_to_move):
@@ -116,6 +127,7 @@ def main():
     board = new_board(height, width)
     players = ('X', 'O')
     turn = 0
+    print_board(board)
     while True:
         player = players[turn % 2]
         other_player = players[(turn + 1) % 2]
@@ -129,6 +141,9 @@ def main():
         board = make_move(board, player, row, col)
         print_board(board)
         winner = get_winner(board)
+        if winner == DRAW:
+            print('Tie game!')
+            return
         if winner is not None:
             print(winner, "wins!")
             return
