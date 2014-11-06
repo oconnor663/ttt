@@ -1,7 +1,8 @@
 #! /usr/bin/python3
 
+
 def new_board(height, width):
-    return [[None] * width for i in range(height)]
+    return ((None,) * width,) * height
 
 
 def get_height(board):
@@ -10,6 +11,14 @@ def get_height(board):
 
 def get_width(board):
     return len(board[0])
+
+
+def make_move(board, player, row, col):
+    # Boards are tuples, so they're immutable. To make a move, we create a new
+    # board with the move made and return that.
+    return tuple(tuple(player if r == row and c == col else board[r][c]
+                       for c in range(get_width(board)))
+                 for r in range(get_height(board)))
 
 
 def format_board(board):
@@ -56,7 +65,7 @@ def debug_print_victory_lines(height, width):
     for line in get_victory_lines(new_board(height, width)):
         dummy_board = new_board(height, width)
         for row, col in line:
-            dummy_board[row][col] = 'x'
+            dummy_board = make_move(dummy_board, 'x', row, col)
         print_board(dummy_board)
         print()
 
@@ -84,12 +93,12 @@ def main():
     turn = 0
     while True:
         player = players[turn % 2]
-        move = input(player + "'s move: ")
-        row, col = (int(i) for i in move.split())
+        move_str = input(player + "'s move: ")
+        row, col = (int(i) for i in move_str.split())
         if row >= height or col >= width or board[row][col] is not None:
             print("Invalid move.")
             continue
-        board[row][col] = player
+        board = make_move(board, player, row, col)
         print_board(board)
         winner = get_winner(board)
         if winner is not None:
