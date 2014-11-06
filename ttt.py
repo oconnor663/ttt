@@ -18,30 +18,20 @@ def get_victory_lines(board):
     # And all the columns.
     for col in range(get_width(board)):
         lines.append([(row, col) for row in range(get_height(board))])
-    # And now all the diagonals. Note that the board might not be square!
-    for 
+    # At some point figure out diagonals.
     return lines
 
 
 def get_winner(board):
-    # Check the rows.
-    for row in range(get_height(board)):
-        first = board[row][0]
-        if first is None:
+    lines = get_victory_lines(board)
+    for line in lines:
+        startrow, startcol = line[0]
+        startval = board[startrow][startcol]
+        if startval is None:
             continue
-        for col in range(get_width(board)):
-            if board[row][col] != first:
+        for row, col in line:
+            if board[row][col] != startval:
                 break
         else:
-            return first
-
-    # Check the cols.
-    for col in range(get_width(board)):
-        first = board[0][col]
-        if first is None:
-            continue
-        for row in range(get_height(board)):
-            if board[row][col] != first:
-                break
-        else:
-            return first
+            return startval
+    return None
