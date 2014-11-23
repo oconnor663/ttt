@@ -68,15 +68,6 @@ def get_diagonal_victory_lines(board):
             [(height - 1 - i, width - 1 - i) for i in range(diag_len)]]
 
 
-def debug_print_victory_lines(height, width):
-    for line in get_victory_lines(new_board(height, width)):
-        dummy_board = new_board(height, width)
-        for row, col in line:
-            dummy_board = make_move(dummy_board, 'x', row, col)
-        print_board(dummy_board)
-        print()
-
-
 def get_winner(board):
     lines = get_victory_lines(board)
     # Check to see if anyone has N-in-a-row.
@@ -144,11 +135,18 @@ def best_move(board, player_to_move, other_player):
 
 
 def print_best_move(board, player, other_player):
+    # Finding the best move can take a while, so print something to let the
+    # user know what we're doing.
+    print("Finding best move... ", end="")
+    # Because this is a partial line, we need to call flush() to make sure
+    # it gets shown immediately.
+    sys.stdout.flush()
+
     result, move = best_move(board, player, other_player)
     if result == LOSE:
         print("The computer says you're screwed :(")
     else:
-        print("The computer says your best move is: {} {} ({})".format(
+        print("{} {} ({})".format(
             move[0], move[1], "win" if result == WIN else "tie"))
 
 
