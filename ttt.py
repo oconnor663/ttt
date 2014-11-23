@@ -29,10 +29,20 @@ def make_move(board, player, row, col):
 
 
 def format_board(board):
-    row_separator = "\n" + "┼".join(["───"] * get_width(board)) + "\n"
-    return row_separator.join(
-        " " + " │ ".join(char or " " for char in row)
-        for row in board)
+    # Do the first row of letters.
+    result = "   " + " ".join(" {} ".format(i + 1)
+                              for i in range(get_width(board)))
+    for row in range(get_height(board)):
+        if row > 0:
+            # Add the row separator.
+            result += "\n   " + "┼".join(["───"] * get_width(board))
+        row_str = "\n" + " {}  " .format(chr(ord("a") + row))
+        for col in range(get_width(board)):
+            if col > 0:
+                row_str += " │ "
+            row_str += board[row][col] or " "
+        result += row_str
+    return result
 
 
 def print_board(board):
@@ -134,6 +144,23 @@ def best_move(board, player_to_move, other_player):
     return (LOSE, None)
 
 
+# Internally, a move in the top left corner is (0, 0). But we don't want the
+# user to have to type that. Instead, we're going to have the user think of
+# that as "a1". The move_to_str and str_to_move functions do this translation
+# for us.
+def move_to_str(move):
+    row_letter = chr(ord('a') + move[0])
+    col_number = move[1] + 1
+    return row_letter + str(col_number)
+
+
+def str_to_move(user_str):
+    row_letter = user_str[0].lower()
+    row_number = ord(row_letter) - ord("a")
+    col_number = int(user_str[1:].strip()) - 1
+    return (row_number, col_number)
+
+
 def print_best_move(board, player, other_player):
     # Finding the best move can take a while, so print something to let the
     # user know what we're doing.
@@ -146,8 +173,8 @@ def print_best_move(board, player, other_player):
     if result == LOSE:
         print("The computer says you're screwed :(")
     else:
-        print("{} {} ({})".format(
-            move[0], move[1], "win" if result == WIN else "tie"))
+        print("{} ({})".format(move_to_str(move),
+                               "win" if result == WIN else "tie"))
 
 
 def main():
@@ -165,7 +192,7 @@ def main():
         other_player = players[(turn + 1) % 2]
         print_best_move(board, player, other_player)
         move_str = input(player + "'s move: ")
-        row, col = (int(i) for i in move_str.split())
+        row, col = str_to_move(move_str)
         if row >= height or col >= width or board[row][col] is not None:
             print("Invalid move.")
             continue
