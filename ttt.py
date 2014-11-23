@@ -79,6 +79,7 @@ def debug_print_victory_lines(height, width):
 
 def get_winner(board):
     lines = get_victory_lines(board)
+    # Check to see if anyone has N-in-a-row.
     for line in lines:
         startrow, startcol = line[0]
         startval = board[startrow][startcol]
@@ -89,6 +90,7 @@ def get_winner(board):
                 break
         else:
             return startval
+    # Check to see whether the board is totally full.
     for row in range(get_height(board)):
         for col in range(get_width(board)):
             if board[row][col] is None:
@@ -107,15 +109,47 @@ def possible_moves(board, player_to_move):
 
 def best_move(board, player_to_move, other_player):
     all_possible = possible_moves(board, player_to_move)
+    assert all_possible, "there must be some possible moves"
+    draw_moves = []
     for move in all_possible:
+        # Look at each possible move.
         new_board = make_move(board, player_to_move, move[0], move[1])
         winner = get_winner(new_board)
+        # If any move makes you win immediately, just return that.
         if winner == player_to_move:
-            return move
-        response = best_move(new_board, other_player, player_to_move)
-        if response is None:
-            return move
-    return None
+            return (WIN, move)
+        # Keep track of moves that are immediate draws too. That might end up
+        # being the best option.
+        elif winner == DRAW:
+            draw_moves.append(move)
+            continue
+
+        # If the game is not yet decided, recursively call best_move from the
+        # other player's perspective. THIS IS WHERE THE MAGIC HAPPENS! If the
+        # other player has no winning response, then this is a good move.
+        result, response = best_move(new_board, other_player, player_to_move)
+        if result == LOSE:
+            return (WIN, move)
+        elif result == DRAW:
+            draw_moves.append(move)
+
+    # At this point, if we had found any winning moves, we would have already
+    # returned them. So it looks like there's no winning move. If there's a
+    # draw move, return that.
+    if draw_moves:
+        return (DRAW, draw_moves[0])
+
+    # If there weren't any draw moves, looks like we're screwed.
+    return (LOSE, None)
+
+
+def print_best_move(board, player, other_player):
+    result, move = best_move(board, player, other_player)
+    if result == LOSE:
+        print("The computer says you're screwed :(")
+    else:
+        print("The computer says your best move is: {} {} ({})".format(
+            move[0], move[1], "win" if result == WIN else "tie"))
 
 
 def main():
@@ -131,8 +165,7 @@ def main():
     while True:
         player = players[turn % 2]
         other_player = players[(turn + 1) % 2]
-        best = best_move(board, player, other_player)
-        print("The computer says your best move is:", repr(best))
+        print_best_move(board, player, other_player)
         move_str = input(player + "'s move: ")
         row, col = (int(i) for i in move_str.split())
         if row >= height or col >= width or board[row][col] is not None:
